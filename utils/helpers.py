@@ -8,7 +8,7 @@ import pyperclip
 import pandas as pd
 from skimage.metrics import structural_similarity as ssim
 
-from funcs import capture_screen, find_text, find_image
+from utils.funcs import capture_screen, find_text, find_image
 
 
 readers = {'1': easyocr.Reader(['ch_sim'], model_storage_directory=r'ocr_models'),

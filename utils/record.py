@@ -4,7 +4,7 @@ from datetime import datetime
 from pynput import mouse, keyboard
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
-from mappings import combine_mapping
+from utils.mappings import combine_mapping
 
 # ----------准备阶段----------
 records = []                  # 操作记录
