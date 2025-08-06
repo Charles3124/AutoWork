@@ -1,0 +1,37 @@
+使用 from funcs import find_text 导入函数
+
+使用示例：
+
+position = find_text(target=text, image_path=path, region=(0,0,100,100), reader=reader)
+
+其中：
+
+一、text 是要找的文字，是一个字符串，不能为空
+
+二、path 是图片路径
+
+1. 填路径，就从图片里找
+
+2. 填 None，就对屏幕进行截图，然后找文字
+
+三、region 是指定范围
+
+1. 填字符串 'left': 左, 'right': 右, 'up': 上, 'down': 下, 'q1': 左上, 'q2': 右上, 'q3': 左下, 'q4': 右下
+
+2. 填 (x1, y1, x2, y2)，指定 左上角、右下角 的坐标
+
+3. 填 None，检查整个屏幕或图片
+
+四、reader 是查找器
+
+1. 推荐使用方法：
+
+首先创建 reader = easyocr.Reader(['ch_sim', 'en'], model_storage_directory=r'ocr_models')
+
+然后作为参数，传入 find_text 函数里
+
+找中文使用 'ch_sim'，找英文使用 'en'，都要找就两个都填
+
+2. 不推荐的方法：
+
+如果写 reader=None，那么函数会自动创建一个中英文查找器
