@@ -483,7 +483,7 @@ root = tk.Tk()
 root.title("自动执行程序")
 gui_width, gui_height = 550, 480
 
-rate = 1.5
+rate = 1.2
 gui_width = int(rate * gui_width)
 gui_height = int(rate * gui_height)
 
