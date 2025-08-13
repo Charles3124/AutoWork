@@ -4,6 +4,7 @@ import shutil
 import threading
 from threading import Event
 from datetime import datetime, timedelta
+from typing import Optional, Union
 
 import cv2
 import pandas as pd
@@ -13,7 +14,7 @@ from PIL import Image, ImageTk
 from playsound import playsound
 from openpyxl import load_workbook
 from pynput.mouse import Controller as MouseController, Button
-from pynput.keyboard import Controller as KeyboardController, Key, Listener as KeyboardListener
+from pynput.keyboard import Controller as KeyboardController, Key, KeyCode, Listener as KeyboardListener
 
 from utils.funcs import capture_screen
 from utils.mappings import button_mapping, key_mapping
@@ -30,7 +31,7 @@ rectangle_color = 'green'         # 矩形颜色
 
 
 # ----------监听键盘按键函数----------
-def on_press(key):
+def on_press(key: Union[Key, KeyCode]) -> None:
     global exit_flag
     if key == Key.esc:
         insert_text(f'控制台：Esc 按下，等待程序退出...\n')
@@ -46,14 +47,14 @@ def on_press(key):
 
 
 # ----------实时显示进程----------
-def insert_text(text: str):
+def insert_text(text: str) -> None:
     info_text.tag_configure("big", font=("宋体", 14), spacing3=7)
     info_text.insert(tk.END, text, "big")
     info_text.yview(tk.END)
 
 
 # ----------主程序----------
-def run(given_excel_path=None):
+def run(given_excel_path: Optional[str] = None) -> None:
 
     # 设置置顶状态
     if checkbox_var.get():
@@ -108,7 +109,11 @@ def run(given_excel_path=None):
         pause_event.wait()   # 如果暂停，等待直到恢复
 
         # 读取时间、事件、细节、条件
-        cur_time, event, detail, condition = times[i], events[i], details[i], conditions[i]
+        cur_time: float = times[i]
+        event: str = events[i]
+        detail: str = details[i]
+        condition: Optional[str] = conditions[i]
+
         if event == detail == 'nan':
             i += 1
             continue
@@ -120,6 +125,7 @@ def run(given_excel_path=None):
             else:
                 time.sleep(max(cur_time - times[i - 1], min_time_gap))
 
+        # 判断是哪种指令
         if "循环" in event:
             if '退出' in detail:
                 last_info = l_info[-1]
@@ -184,7 +190,10 @@ def run(given_excel_path=None):
 
             else:                 # 开始判断
                 insert_text(f'开始判断...')
-                judgement_result = True if "其他" in detail else judge_condition(condition, all_data, all_data_index, all_variables, all_figures)
+                if '其他' in detail:
+                    judgement_result = True
+                else:
+                    judgement_result = judge_condition(condition, all_data, all_data_index, all_variables, all_figures)
 
                 if judgement_result:
                     insert_text(f'判断为真\n')
@@ -368,7 +377,7 @@ def run(given_excel_path=None):
 
         elif '变量' in event:
             if '获取' in event:
-                if condition.count('|') == 1 and not condition.startswith('图片') and not condition.startswith('彩图'):      # 获取范围内的文字
+                if condition.count('|') == 1 and not condition.startswith(('图片', '彩图')):   # 获取范围内的文字
                     parts = condition.split('|')
                     image = capture_screen()
                     l, u, r, d = get_variable(parts[1], all_variables)
@@ -483,7 +492,7 @@ root = tk.Tk()
 root.title("自动执行程序")
 gui_width, gui_height = 550, 480
 
-rate = 1.2
+rate = 1.25
 gui_width = int(rate * gui_width)
 gui_height = int(rate * gui_height)
 
@@ -493,7 +502,6 @@ root.resizable(False, False)
 rect_width, rect_height = 150, 40
 button_font_big = ('宋体', 14)
 button_font_small = ('宋体', 12)
-
 
 # -------加载背景-------
 image = Image.open("backgrounds/1.png")
@@ -506,7 +514,7 @@ canvas.pack(fill="both", expand=True)
 canvas.create_image(0, 0, anchor=tk.NW, image=photo)
 
 # 处理窗口大小变化
-def resize_image(event):
+def resize_image(event: tk.Event) -> None:
     width, height = root.winfo_width(), root.winfo_height()                   # 获取窗口大小
     resized_image = image.resize((width, height), Image.Resampling.LANCZOS)   # 根据新的大小调整图片
     resized_photo = ImageTk.PhotoImage(resized_image)                         # 转换成 Canvas 可以显示的图片格式
@@ -518,29 +526,29 @@ def resize_image(event):
 # 绑定窗口大小变化事件
 root.bind("<Configure>", resize_image)
 
-
 # -------生成矩形-------
-def initialize_rectangle(color):
-    rect = canvas.create_rectangle((gui_width - rect_width) // 2, 30, (gui_width + rect_width) // 2, 30 + rect_height, fill=color, tags="rectangle")
+def initialize_rectangle(color: str) -> None:
+    rect = canvas.create_rectangle((gui_width - rect_width) // 2, 30,
+                                   (gui_width + rect_width) // 2, 30 + rect_height,
+                                   fill=color, tags="rectangle")
 
-
-# -------获取 my_program 文件夹中的 Excel 文件列表-------
-def get_excel_files():
+# -------获取 my_programs 文件夹中的 Excel 文件列表-------
+def get_excel_files() -> Optional[list[str]]:
     excel_files = []
-    my_program_path = os.path.join(os.getcwd(), "my_programs")
-    if os.path.exists(my_program_path):
-        for file in os.listdir(my_program_path):
+    my_programs_path = os.path.join(os.getcwd(), "my_programs")
+    if os.path.exists(my_programs_path):
+        for file in os.listdir(my_programs_path):
             if file.endswith(('.xlsx', '.xls')):
                 excel_files.append(f"my_programs/{file}")
     return excel_files
 
 # -------更新下拉菜单选项-------
-def update_excel_dropdown():
+def update_excel_dropdown() -> None:
     excel_files = get_excel_files()
     excel_combobox['values'] = excel_files
 
 # -------当选择下拉菜单项时的处理函数-------
-def on_excel_selected(event):
+def on_excel_selected(event: tk.Event) -> None:
     selected = excel_combobox.get()
     excel_combobox.set(selected)
 
@@ -550,15 +558,14 @@ excel_combobox.place(relx=0.5, y=90, anchor="n")
 update_excel_dropdown()    # 初始化下拉菜单选项
 excel_combobox.bind("<<ComboboxSelected>>", on_excel_selected)
 
-
 # -------运行按钮-------
-def run_in_thread():
+def run_in_thread() -> None:
     threading.Thread(target=run).start()
 save_button = tk.Button(root, text="运行", command=run_in_thread, font=button_font_big)
 save_button.place(relx=0.55, y=140, anchor="n")
 
 # -------清除按钮-------
-def clear():
+def clear() -> None:
     excel_combobox.set('')
 clear_button = tk.Button(root, text="清除", command=clear, font=button_font_big)
 clear_button.place(relx=0.7, y=140, anchor="n")
@@ -568,11 +575,9 @@ checkbox_var = tk.BooleanVar()
 checkbox = tk.Checkbutton(root, text="运行后隐藏界面", variable=checkbox_var, font=button_font_big)
 checkbox.place(relx=0.2, y=142, anchor="n")
 
-
 # -------信息输出-------
 info_text = tk.Text(root, height=16, width=60)
 info_text.place(relx=0.5, y=205, anchor="n")
-
 
 # -------启动 GUI-------
 root.mainloop()

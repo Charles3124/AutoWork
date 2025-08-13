@@ -1,8 +1,13 @@
+# funcs.py
 import cv2
 import easyocr
 import pyautogui
 import numpy as np
 from screeninfo import get_monitors
+from typing import Optional
+
+RegionType = tuple[int, int, int, int] | str | None
+PositionType = tuple[int, int] | tuple[()]
 
 # 裁剪区域
 CROP_REGION = {
@@ -16,7 +21,7 @@ CROP_REGION = {
     "q4": (0.5, 1, 0.5, 1)
 }
 
-def capture_screen():
+def capture_screen() -> np.ndarray:
     """
     捕捉整个屏幕的截图并返回 BGR 格式的图像
     """
@@ -25,7 +30,7 @@ def capture_screen():
     screenshot_bgr = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
     return screenshot_bgr
 
-def capture_screen_by_monitor(monitor_index=None):
+def capture_screen_by_monitor(monitor_index: int | None = None) -> np.ndarray:
     """
     捕捉整个屏幕的截图或指定显示器的截图并返回 BGR 格式的图像。
     :param monitor_index: 指定显示器的索引，默认为 None 表示截取所有显示器的屏幕
@@ -45,7 +50,12 @@ def capture_screen_by_monitor(monitor_index=None):
     screenshot_bgr = cv2.cvtColor(screenshot_np, cv2.COLOR_RGB2BGR)
     return screenshot_bgr
 
-def find_text(target, image_path=None, region=None, reader=None):
+def find_text(
+    target: str,
+    image_path: Optional[str] = None,
+    region: RegionType = None,
+    reader: Optional[easyocr.Reader] = None
+) -> PositionType:
     """
     在图像中寻找指定的文字，并返回第一个符合的文字的位置。
     :param target: 目标文字
@@ -80,6 +90,7 @@ def find_text(target, image_path=None, region=None, reader=None):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)    # 转换为灰度图
     results = reader.readtext(gray_image)                   # 寻找文字
 
+    # 返回匹配位置
     for (bbox, text, _) in results:
         if target in text:              # 找到就返回结果
             res_x += (bbox[0][0] + bbox[2][0]) // 2
@@ -87,12 +98,18 @@ def find_text(target, image_path=None, region=None, reader=None):
             return (res_x, res_y)
     return ()
 
-def find_image(target, image_path=None, region=None, gray=True):
+def find_image(
+    target: str,
+    image_path: Optional[str] = None,
+    region: RegionType = None,
+    gray: bool = True
+) -> PositionType:
     """
     在图像中寻找指定模板的位置，并返回第一个符合的图片的中心坐标。
     :param target: 模板图片路径
     :param image_path: 图片路径，如果为 None，则进行屏幕截图
     :param region: 区域范围，字符串或像素值的元组
+    :param gray: 读取彩图或者灰度图
     :return: 返回匹配位置的元组 (x, y)，如果未找到匹配项，则返回空元组
     """
     # 读取模板图片
