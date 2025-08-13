@@ -128,10 +128,9 @@ def run(given_excel_path: Optional[str] = None) -> None:
         # 判断是哪种指令
         if "循环" in event:
             if '退出' in detail:
-                last_info = l_info[-1]
-                i = last_info['end']
                 insert_text(f'直接退出第{len(l_info)}层循环！\n')
-                l_info.pop()
+                last_info = l_info.pop()
+                i = last_info['end']
 
             elif "}" in detail or "继续" in detail:
                 last_info = l_info[-1]
@@ -500,8 +499,7 @@ root.geometry(f'{gui_width}x{gui_height}')
 root.resizable(False, False)
 
 rect_width, rect_height = 150, 40
-button_font_big = ('宋体', 14)
-button_font_small = ('宋体', 12)
+button_font = ('宋体', 14)
 
 # -------加载背景-------
 image = Image.open("backgrounds/1.png")
@@ -553,7 +551,7 @@ def on_excel_selected(event: tk.Event) -> None:
     excel_combobox.set(selected)
 
 # -------Excel 路径输入框-------
-excel_combobox = ttk.Combobox(root, width=43, font=button_font_big)
+excel_combobox = ttk.Combobox(root, width=43, font=button_font)
 excel_combobox.place(relx=0.5, y=90, anchor="n")
 update_excel_dropdown()    # 初始化下拉菜单选项
 excel_combobox.bind("<<ComboboxSelected>>", on_excel_selected)
@@ -561,18 +559,18 @@ excel_combobox.bind("<<ComboboxSelected>>", on_excel_selected)
 # -------运行按钮-------
 def run_in_thread() -> None:
     threading.Thread(target=run).start()
-save_button = tk.Button(root, text="运行", command=run_in_thread, font=button_font_big)
+save_button = tk.Button(root, text="运行", command=run_in_thread, font=button_font)
 save_button.place(relx=0.55, y=140, anchor="n")
 
 # -------清除按钮-------
 def clear() -> None:
     excel_combobox.set('')
-clear_button = tk.Button(root, text="清除", command=clear, font=button_font_big)
+clear_button = tk.Button(root, text="清除", command=clear, font=button_font)
 clear_button.place(relx=0.7, y=140, anchor="n")
 
 # -------复选框-------
 checkbox_var = tk.BooleanVar()
-checkbox = tk.Checkbutton(root, text="运行后隐藏界面", variable=checkbox_var, font=button_font_big)
+checkbox = tk.Checkbutton(root, text="运行后隐藏界面", variable=checkbox_var, font=button_font)
 checkbox.place(relx=0.2, y=142, anchor="n")
 
 # -------信息输出-------
