@@ -28,6 +28,7 @@ from file_manager import FileController
 from image_control import ScreenShotController
 from device_control import MouseController, KeyboardController
 from data_control import VariableController
+from time_control import TimeController
 
 
 # ------- 准备阶段 -------
@@ -37,7 +38,6 @@ pause_event = Event()       # 键盘监听器
 pause_event.set()           # 默认不暂停
 exit_flag = False           # 初始化退出标志
 rectangle_color = GREEN     # 矩形颜色
-min_time_gap = 0.1          # 最小执行间距
 
 
 def on_press(key: Union[Key, KeyCode]) -> Optional[bool]:
@@ -123,7 +123,8 @@ def run(given_excel_path: Optional[str] = None) -> None:
 
     # 主循环开始
     i = 0
-    time.sleep(max(times[0], min_time_gap))
+    time_controller = TimeController(times)
+    time_controller.sleep_start()
 
     while i < df_length:
         if exit_flag:
@@ -145,10 +146,7 @@ def run(given_excel_path: Optional[str] = None) -> None:
 
         # 等待时间差
         if i > 0:
-            if cur_time == -1.0 or times[i - 1] == -1.0:
-                time.sleep(0.1)
-            else:
-                time.sleep(max(cur_time - times[i - 1], min_time_gap))
+            time_controller.sleep_loop(i)
 
         # 判断是哪种指令
         matched = False

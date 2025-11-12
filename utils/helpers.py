@@ -20,10 +20,6 @@ from skimage.metrics import structural_similarity as ssim
 from utils.funcs import capture_screen, find_text, find_image
 from utils.data_manager import DataManager
 from utils.types import TimeType, CommandType, RegionType, PositionType
-from flow_control import LoopController, SelectController, WaitController
-from data_io import DataReader, DataWriter
-from file_manager import FileController
-from image_control import ScreenShotController
 
 
 readers = {
@@ -56,13 +52,9 @@ def read_and_process_excel(target_excel_path: str) -> tuple[int, TimeType, Comma
 
 
 def get_event_handlers(
-        loop_controller: LoopController,
-        select_controller: SelectController,
-        wait_controller: WaitController,
-        data_reader: DataReader,
-        data_writer: DataWriter,
-        file_controller: FileController,
-        screen_shot_controller: ScreenShotController
+        loop_controller, select_controller, wait_controller,
+        data_reader, data_writer,
+        file_controller, screen_shot_controller
 ):
     """创建事件分发器"""
     return {
