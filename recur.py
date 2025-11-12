@@ -7,7 +7,6 @@ recur.py
 """
 
 import os
-import time
 import threading
 from threading import Event
 from typing import Optional, Union
