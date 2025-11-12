@@ -34,7 +34,7 @@ def capture_screen() -> np.ndarray:
     return screenshot_bgr
 
 
-def capture_screen_by_monitor(monitor_index: int | None = None) -> np.ndarray:
+def capture_screen_by_monitor(monitor_index: Optional[int] = None) -> np.ndarray:
     """
     捕捉整个屏幕的截图或指定显示器的截图并返回 BGR 格式的图像。
     :param monitor_index: 指定显示器的索引，默认为 None 表示截取所有显示器的屏幕

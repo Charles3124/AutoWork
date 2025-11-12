@@ -37,6 +37,7 @@ class WaitController:
         gap_time, max_time = map(float, parts[1].split(','))
         normal_break = True
 
+        part1 = part2 = threshold = condition_map = None
         if '相似' in parts[0]:
             part1, part2, threshold = condition.split('|')
 
@@ -58,11 +59,15 @@ class WaitController:
 
             if condition_map[negative_flag]:
                 break
+
             if end_time - start_time >= max_time:
                 normal_break = False
                 break
 
-        self.insert_text(f'等待{'结束' if normal_break else '超时'}！共等了{end_time - start_time:.2f}秒\n')
+        self.insert_text(
+            f'等待{'结束' if normal_break else '超时'}！'
+            f'共等了{end_time - start_time:.2f}秒\n'
+        )
 
         if i < self.df_length - 1 and '超时' in self.events[i + 1]:
             # 正常结束
