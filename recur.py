@@ -18,7 +18,8 @@ from playsound import playsound
 from pynput.mouse import Controller as MController
 from pynput.keyboard import Controller as KController, Key, KeyCode, Listener as KeyboardListener
 
-from utils.helpers import readers, read_and_process_excel, get_event_handlers
+from event_handlers import get_event_handlers
+from utils.helpers import readers, read_and_process_excel
 from utils.data_manager import DataManager
 from utils.colors import *
 from flow_control import LoopController, SelectController, WaitController
@@ -99,25 +100,31 @@ def run(given_excel_path: Optional[str] = None) -> None:
     df_length, times, events, details, conditions = read_and_process_excel(target_excel_path)
 
     # 创建所有控制器
+    # 数据、变量控制器
     data_manager = DataManager()
+    data_controller = VariableController(readers, data_manager, insert_text)
 
+    # 循环、选择、等待控制器
     loop_controller = LoopController(events, details, data_manager, insert_text)
     select_controller = SelectController(events, details, data_manager, insert_text)
     wait_controller = WaitController(df_length, events, details, data_manager, insert_text)
 
+    # 数据读取、输出控制器
     data_reader = DataReader(data_manager, insert_text)
     data_writer = DataWriter(data_manager, insert_text)
-    data_controller = VariableController(readers, data_manager, insert_text)
 
+    # 文件、截图控制器
     file_controller = FileController(data_manager, insert_text)
     screen_shot_controller = ScreenShotController(data_manager, insert_text)
 
+    # 鼠标、键盘控制器
     mouse_controller = MouseController(mouse, data_manager, insert_text)
     keyboard_controller = KeyboardController(keyboard, data_manager, insert_text)
 
     handlers = get_event_handlers(
         loop_controller, select_controller, wait_controller,
-        data_reader, data_writer, file_controller, screen_shot_controller
+        data_reader, data_writer,
+        file_controller, screen_shot_controller
     )
 
     # 主循环开始

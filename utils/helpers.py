@@ -51,23 +51,6 @@ def read_and_process_excel(target_excel_path: str) -> tuple[int, TimeType, Comma
     return df_length, temp_dic['时间'], temp_dic['事件'], temp_dic['细节'], temp_dic['条件']
 
 
-def get_event_handlers(
-        loop_controller, select_controller, wait_controller,
-        data_reader, data_writer,
-        file_controller, screen_shot_controller
-):
-    """创建事件分发器"""
-    return {
-        '循环': lambda i, event, detail, condition: loop_controller.handle_loop(i, event, detail),
-        '选择': lambda i, event, detail, condition: select_controller.handle_select(i, event, detail, condition),
-        '等待': lambda i, event, detail, condition: wait_controller.handle_wait(i, detail, condition),
-        '读取': lambda i, event, detail, condition: (data_reader.handle_read(detail, condition), i + 1),
-        '写入': lambda i, event, detail, condition: (data_writer.handle_write(detail, condition), i + 1),
-        '文件': lambda i, event, detail, condition: (file_controller.handle_control(detail, condition), i + 1),
-        '截图': lambda i, event, detail, condition: (screen_shot_controller.handle_shot(detail, condition), i + 1)
-    }
-
-
 def type_text(text: Optional[str] = None) -> None:
     """输入文字"""
     if text is not None:
